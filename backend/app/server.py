@@ -4,7 +4,8 @@ from langserve import add_routes
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.constants import constants
-from app.bdd import qdrant
+from app.bdd import qdrant_manage
+from app.AI.retriever import get_retriever_with_keywords
 app = FastAPI()
 
 
