@@ -1,19 +1,17 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.constants import constants
-from app.bdd import qdrant_manage
+from app.bdd import qdrant_manage,information_manage
 from app.AI.retriever import get_retriever_with_keywords
+from app.routes import routes_upload as upload
+
+
 app = FastAPI()
-
-
-@app.get("/")
-async def redirect_root_to_docs():
-    return RedirectResponse("/docs")
-
-
+app.include_router(upload.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,9 +20,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app = FastAPI(root_path=constants.PREFIX, docs_url=None,
-              redoc_url=None, openapi_url=None)
+
+@app.get("/")
+async def redirect_root_to_docs():
+    return RedirectResponse("/docs")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8100)
+    asyncio.run(information_manage.execute()) 
+    uvicorn.run(app, host="0.0.0.0", port=8100,loop="asyncio")

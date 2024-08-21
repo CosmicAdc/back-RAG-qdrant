@@ -8,7 +8,15 @@ from uuid import uuid4
 from typing import List
 import json
 
-
+from langchain.chains.query_constructor.ir import (
+    Comparator,
+    Comparison,
+    Operation,
+    Operator,
+    StructuredQuery,
+)
+from langchain_community.query_constructors.qdrant import QdrantTranslator
+ 
 client = QdrantClient(
     host="localhost", port=6333
 )
@@ -44,11 +52,12 @@ def get_collection_vectorstore(collection_name:str):
         print("no se encontro la collección")
         return None
 
-def add_documents(list_documents:List[Document],collection_name:str):
+async def add_documents(list_documents:List[Document],collection_name:str):
     vectorstore=get_collection_vectorstore(collection_name)
     if vectorstore!= None:
         ids = [str(uuid4()) for _ in range(len(list_documents))]
         vectorstore.add_documents(documents=list_documents, ids=ids)
+        return "url procesadas correctamente"
     else: return vectorstore
 
 def delete_collection(collection_name:str):
@@ -67,7 +76,6 @@ def delete_documents(list_ids:List[str],collection_name:str):
 def format_data_documents(records):
     records_list, _ = records
     extracted_data = {}
-    
     for record in records_list:
         extracted_data[record.id] = {
             'metadata': record.payload['metadata'],
@@ -86,12 +94,17 @@ def get_all_documents_by_collection(collection_name:str):
         return json.dumps(results, indent=4)
     else: return vectorstore
     
-def update_documents(collection_name:str,list_ids:List[str],list_documents:List[Document]):
+async def update_documents(collection_name:str,list_ids:List[str],document:Document):
     vectorstore=get_collection_vectorstore(collection_name)
     if vectorstore!= None:
         try:
-            delete_documents(list_ids,collection_name)
-            add_documents(list_documents,collection_name)
+            client.overwrite_payload(
+                collection_name=collection_name,
+                payload={
+                    "page_content": document.page_content,
+                },
+                points=list_ids,
+            )
             print("actualizado correctamente")
             return True
         except Exception as e:
@@ -113,3 +126,36 @@ delete_documents(ids_del,col_name)
 #print(get_all_documents_by_collection(col_name))
 #delete_collection(col_name)
 #print(create_collection(col_name))
+
+
+def construct_comparisons(query_request):
+    comparisons = []
+    if query_request.metadata_values:
+        for attribute, value in query_request.metadata_values.items():
+            comparisons.append(
+                Comparison(
+                    comparator=Comparator.EQ,
+                    attribute=attribute,
+                    value=value,
+                )
+            )
+    return comparisons
+
+async def selfQueryng(request):
+
+    query_request = request
+    comparisons = construct_comparisons(query_request)
+
+    operators_mapping = {
+        "AND": Operator.AND,
+        "OR": Operator.OR
+    }
+    operator_value = query_request.operator
+
+    operator = operators_mapping[operator_value]
+    if (len(comparisons)>1):
+        _filter = Operation(operator=operator, arguments=comparisons)
+        filtros = QdrantTranslator().visit_operation(_filter)
+        return filtros
+    filtros = QdrantTranslator().visit_comparison(comparisons[0])
+    return filtros

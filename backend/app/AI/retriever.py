@@ -24,12 +24,10 @@ def get_retriever(collection_name:str,query:str):
     else: return vectorstore
     
 
-
-
-def get_retriever_with_keywords(collection_name: str, query: str, keywords: List[str], hybrid_search: bool = False):
+def get_retriever_with_keywords(collection_name: str, query: str, keywords: List[str], strict: bool = False):
     vectorstore = get_collection_vectorstore(collection_name)
     if vectorstore is not None:
-        condition_type = "should" if hybrid_search else "must"
+        condition_type = "should" if strict else "must"
         
         keyword_filter = models.Filter(**{
             condition_type: [
@@ -51,11 +49,14 @@ def get_retriever_with_keywords(collection_name: str, query: str, keywords: List
     else:
         return vectorstore
     
-keywords = ["delet"]
+keywords = ["delet","sad","sadsf"]
 col_name="superprueba4"
 query="i will be deleted"
 
 get_retriever(col_name,query)
 
-get_retriever_with_keywords(col_name,query,keywords,hybrid_search=True)
+get_retriever_with_keywords(col_name,query,keywords,strict=True)
+
+
+
 
