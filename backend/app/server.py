@@ -7,11 +7,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.constants import constants
 from app.bdd import qdrant_manage,information_manage
 from app.AI.retriever import get_retriever_with_keywords
-from app.routes import routes_upload as upload
+from app.routes import routes_history,routes_upload,routes_qdrant
+
 
 
 app = FastAPI()
-app.include_router(upload.router)
+
+
+app.include_router(routes_history.router) 
+app.include_router(routes_upload.router)
+app.include_router(routes_qdrant.router)
+
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

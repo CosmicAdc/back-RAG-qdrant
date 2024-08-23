@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import List
 import uuid
 from app.bdd.qdrant_manage import add_documents
-from app.schemas.upload import UploadUrlSchema
-from app.utils.utils import cleanTXT, translate
+from app.schemas.schemas import UploadUrlSchema
+from app.utils.utils import cleanTXT, translate,text_splitter
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.document_transformers import Html2TextTransformer
 from langchain_core.documents import Document
@@ -24,10 +24,14 @@ async def process_urls(data: UploadUrlSchema):
         if data.metadata is not None:
             if isinstance(data.metadata, list):
                 for json_string in data.metadata:
-                    json_object = json.loads(json_string)
-                    metadata_values.update(json_object)
+                    try:
+                        json_object = json.loads(json_string)
+                        print(f"JSON object: {json_object}")  # Print JSON object
+                        metadata_values.update(json_object)
+                    except json.JSONDecodeError as e:
+                        print(f"Error decoding JSON: {e}")  # Print error if JSON decoding fails
             else:
-                metadata_values.update( data.metadata)
+                metadata_values.update(data.metadata)
         metadata_dict = document.metadata
         if metadata_dict is not None and isinstance(metadata_dict, dict):
             metadata_values.update(metadata_dict)
@@ -40,7 +44,7 @@ async def process_urls(data: UploadUrlSchema):
         dc = cleanTXT(dc)
         newdoc =Document(page_content=dc, metadata=metadata_values)
         docs.append(newdoc)
-    print(docs)
-    return await add_documents(list_documents=docs, collection_name=data.collection_name)
+    docs_split=text_splitter.split_documents(docs)
+    return await add_documents(list_documents=docs_split, collection_name=data.collection_name)
     
     

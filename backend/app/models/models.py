@@ -1,19 +1,21 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
+import httpx 
+
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_core.runnables import ConfigurableField
 from langchain_community.llms import VLLMOpenAI
 from app.constants import constants as settings
 
     
-    
+http_client = httpx.Client(verify=False)
+
 VLLM = VLLMOpenAI(
     openai_api_key=settings.VLLM_API_KEY,
     openai_api_base=f"{settings.VLLM_REMOTE_HOST}/v1",
     model_name=settings.VLLM_MODEL,
     max_tokens=settings.VLLM_MAX_TOKENS,
     temperature=0.1,
-    model_kwargs={"stop": ["<|end|>","\n\n\n"]},
+    model_kwargs={"stop": ["<|end|>","Human"]},
+    http_client=http_client,
 ).configurable_fields(
     temperature=ConfigurableField(
         id="temperature",
@@ -26,6 +28,7 @@ VLLM = VLLMOpenAI(
         description="The max new tokens of the LLM",
     ),
 )
+
 
 model_name = "jinaai/jina-embeddings-v2-base-es"
 model_kwargs = {'device': 'cpu'}

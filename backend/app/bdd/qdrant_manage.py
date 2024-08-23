@@ -1,7 +1,6 @@
-from qdrant_client import QdrantClient,models
+from qdrant_client import QdrantClient
 from langchain_qdrant import Qdrant
 from qdrant_client.http.models import Distance, VectorParams
-from langchain.text_splitter import CharacterTextSplitter
 from app.models.models import embeddings
 from langchain_core.documents import Document
 from uuid import uuid4
@@ -13,15 +12,12 @@ from langchain.chains.query_constructor.ir import (
     Comparison,
     Operation,
     Operator,
-    StructuredQuery,
 )
-from langchain_community.query_constructors.qdrant import QdrantTranslator
+from langchain.retrievers.self_query.qdrant import QdrantTranslator
  
 client = QdrantClient(
     host="localhost", port=6333
 )
-
-col_name="superprueba4"
 
 
 def validate_existence_collection(collection_name:str):
@@ -71,6 +67,7 @@ def delete_documents(list_ids:List[str],collection_name:str):
     vectorstore=get_collection_vectorstore(collection_name)
     if vectorstore!= None:
        vectorstore.delete(ids=list_ids)
+       return True
     else: return vectorstore
     
 def format_data_documents(records):
@@ -89,6 +86,7 @@ def get_all_documents_by_collection(collection_name:str):
     if vectorstore!= None:
         result= client.scroll(
             collection_name=collection_name,
+            limit=100000,
         )
         results = format_data_documents(result)
         return json.dumps(results, indent=4)
@@ -102,6 +100,7 @@ async def update_documents(collection_name:str,list_ids:List[str],document:Docum
                 collection_name=collection_name,
                 payload={
                     "page_content": document.page_content,
+                    "metadata": document.metadata,
                 },
                 points=list_ids,
             )
@@ -113,20 +112,6 @@ async def update_documents(collection_name:str,list_ids:List[str],document:Docum
             
     else: return vectorstore
     
-
-document_1 = Document(page_content="foo", metadata={"baz": "bar"})
-document_2 = Document(page_content="thud", metadata={"bar": "baz"})
-document_3 = Document(page_content="i will be deleted :(")
-documents = [document_1, document_2, document_3]
-ids_del=["39d445ac-23ef-4c2a-ab4a-57d096213d14"]
-
-create_collection(col_name)
-#add_documents(documents,col_name)
-delete_documents(ids_del,col_name)
-#print(get_all_documents_by_collection(col_name))
-#delete_collection(col_name)
-#print(create_collection(col_name))
-
 
 def construct_comparisons(query_request):
     comparisons = []
