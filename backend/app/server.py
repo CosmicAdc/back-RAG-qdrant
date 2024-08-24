@@ -10,7 +10,6 @@ from app.AI.retriever import get_retriever_with_keywords
 from app.routes import routes_history,routes_upload,routes_qdrant
 
 
-
 app = FastAPI()
 
 

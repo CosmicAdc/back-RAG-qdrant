@@ -20,6 +20,7 @@ class UploadUrlSchema(BaseModel):
 class QuerySchema(BaseModel):
     query: str = Field(..., description="Question of user")
     metadata: Optional[Dict[str, str]] = Field(None, description="Metadata for filter information")
+    operator: Optional[str] = Field(None, description="Operator for filter the metdata AND or OR")
     collection_name: str = Field(..., description="Name of the collection to do the search")
     session_id: str = Field(..., description="session ID")
 

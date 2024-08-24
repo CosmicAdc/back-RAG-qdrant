@@ -12,7 +12,9 @@ router = APIRouter(
 async def upload_url(data: UploadUrlSchema = Body(...)):
     try:
         result = await process_urls(data)
-        if result is not None:
+        if result == []:
+            return JSONResponse(content={"message": "Esta URL no se puede procesar intenta con otra o sube la información por otro medio"}, status_code=500)
+        elif result is not None:
             return JSONResponse(content={"message": "URLs procesadas correctamente"}, status_code=200)
         else:
             return JSONResponse(content={"message": "Error al procesar las URLs"}, status_code=500)

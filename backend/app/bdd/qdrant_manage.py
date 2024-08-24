@@ -49,6 +49,7 @@ def get_collection_vectorstore(collection_name:str):
         return None
 
 async def add_documents(list_documents:List[Document],collection_name:str):
+    print(list_documents)
     vectorstore=get_collection_vectorstore(collection_name)
     if vectorstore!= None:
         ids = [str(uuid4()) for _ in range(len(list_documents))]
@@ -113,10 +114,10 @@ async def update_documents(collection_name:str,list_ids:List[str],document:Docum
     else: return vectorstore
     
 
-def construct_comparisons(query_request):
+def construct_comparisons(metadata):
     comparisons = []
-    if query_request.metadata_values:
-        for attribute, value in query_request.metadata_values.items():
+    if metadata:
+        for attribute, value in metadata.items():
             comparisons.append(
                 Comparison(
                     comparator=Comparator.EQ,
@@ -126,18 +127,13 @@ def construct_comparisons(query_request):
             )
     return comparisons
 
-async def selfQueryng(request):
-
-    query_request = request
-    comparisons = construct_comparisons(query_request)
-
+async def selfQueryng(metadata:dict, operator:str):
+    comparisons = construct_comparisons(metadata)
     operators_mapping = {
         "AND": Operator.AND,
         "OR": Operator.OR
     }
-    operator_value = query_request.operator
-
-    operator = operators_mapping[operator_value]
+    operator = operators_mapping[operator]
     if (len(comparisons)>1):
         _filter = Operation(operator=operator, arguments=comparisons)
         filtros = QdrantTranslator().visit_operation(_filter)

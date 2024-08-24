@@ -9,8 +9,6 @@ import argostranslate.translate
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=1000,
     chunk_overlap=100,
-    length_function=len,
-    is_separator_regex=False,
 )
 
 
@@ -34,16 +32,16 @@ def detect_idiom(text:str):
     return language    
     
 
+
 def cleanTXT(texto: str) -> str:
-    texto = texto.lower()
-    texto = re.sub(r'http\S+', '', texto)
-    texto = re.sub(r'[^a-z0-9\s.,;:?!\'()€$-]', ' ', texto)
-    texto = re.sub(r'\.{2,}', '.', texto)
-    texto = re.sub(r'\s+', ' ', texto).strip()
-    texto = re.sub(r'•.*\n?', '', texto)
-    texto = re.sub(r'\[[^\]]+\]', '', texto)
-    texto = re.sub(r'\"[^\"]+\"', '', texto)
-    texto = re.sub(r'\(\d{4}, [^\)]+\)', '', texto)
-    texto = re.sub(r'\b(?:[a-z]\.){2,}', '', texto)
-    texto = re.sub(r'references?\s+".*?"', '', texto)
+    texto = texto.lower() # Convierte el texto a minúsculas
+    texto = re.sub(r'http\S+', '', texto) # Elimina las URLs
+    texto = re.sub(r'[^a-zA-Z0-9\s.,;:?!\'()€$áéíóúÁÉÍÓÚñÑ-]', ' ', texto)# Reemplaza caracteres no alfanuméricos por espacios
+    texto = re.sub(r'\.{2,}', '.', texto) # Reemplaza puntos consecutivos por un solo punto
+    texto = re.sub(r'\s+', ' ', texto).strip() # Elimina espacios en blanco adicionales y espacios al principio y al final
+    texto = re.sub(r'•.*\n?', '', texto) # Elimina viñetas y el texto que las sigue
+    texto = re.sub(r'\[[^\]]+\]', '', texto) # Elimina texto entre corchetes
+    texto = re.sub(r'\"[^\"]+\"', '', texto) # Elimina texto entre comillas dobles
+    texto = re.sub(r'\(\d{4}, [^\)]+\)', '', texto) # Elimina fechas entre paréntesis
+    texto = re.sub(r'\b(?:[a-z]\.){2,}', '', texto) # Elimina abreviaturas con más de dos puntos
     return texto

@@ -6,20 +6,25 @@ import uuid
 from app.bdd.qdrant_manage import add_documents
 from app.schemas.schemas import UploadUrlSchema
 from app.utils.utils import cleanTXT, translate,text_splitter
-from langchain_community.document_loaders import AsyncHtmlLoader
-from langchain_community.document_transformers import Html2TextTransformer
+from langchain_community.document_loaders import SeleniumURLLoader
 from langchain_core.documents import Document
+
+import nltk
+
+nltk.download('punkt_tab')
+nltk.download('averaged_perceptron_tagger_eng')
 
 
 async def process_urls(data: UploadUrlSchema):
     if not data.urls:
         raise HTTPException(status_code=400, detail="La lista de urls está vacía")
     docs = []
-    loader = AsyncHtmlLoader(data.urls)
+    loader = SeleniumURLLoader(urls =data.urls)
     documents = loader.load()
-    html2text = Html2TextTransformer()
-    documents = html2text.transform_documents(documents)
+    print(documents)
     for document in documents:
+        if not document.page_content.strip():
+            continue  
         metadata_values = {}
         if data.metadata is not None:
             if isinstance(data.metadata, list):
@@ -45,6 +50,9 @@ async def process_urls(data: UploadUrlSchema):
         newdoc =Document(page_content=dc, metadata=metadata_values)
         docs.append(newdoc)
     docs_split=text_splitter.split_documents(docs)
+    if len(docs) == 0:
+        return None
     return await add_documents(list_documents=docs_split, collection_name=data.collection_name)
+    
     
     

@@ -15,7 +15,6 @@ from app.bdd.qdrant_manage import (
 )
 from app.schemas.schemas_qdrant import (
     CollectionSchema,
-    DocumentSchema,
     DeleteDocumentSchema,
     UpdateDocumentSchema,
 )
@@ -47,17 +46,6 @@ async def validate_collection_endpoint(collection_name: str):
     except Exception as e:
         return JSONResponse(content={"message": "Error inesperado " + str(e)}, status_code=500)
 
-@router.post("/add_documents")
-async def add_documents_endpoint(data: DocumentSchema = Body(...)):
-    try:
-        collection_name = data.collection_name
-        documents = [Document(page_content=doc.page_content, metadata=doc.metadata) for doc in data.documents]
-        result = await add_documents(documents, collection_name)
-        return JSONResponse(content={"message": result}, status_code=200)
-    except HTTPException as e:
-        return JSONResponse(content={"message": str(e)}, status_code=e.status_code)
-    except Exception as e:
-        return JSONResponse(content={"message": "Error inesperado " + str(e)}, status_code=500)
 
 @router.delete("/delete_collection/{collection_name}")
 async def delete_collection_endpoint(collection_name: str):

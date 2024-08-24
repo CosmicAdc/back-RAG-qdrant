@@ -9,9 +9,10 @@ from qdrant_client import models
 from app.AI.chain import base_chain_esp,base_chain_en
 from app.bdd.qdrant_manage import client,get_collection_vectorstore
 from app.constants import constants as settings
-from app.models.models import embeddings,VLLM
+from app.models.models import embeddings,VLLM,compressor
 from app.AI.PROMPTS import contextualize_q_prompt_spanish,contextualize_q_prompt_english
 from langchain_community.chat_message_histories import RedisChatMessageHistory
+from langchain.retrievers import ContextualCompressionRetriever
 
 
 store = {}
@@ -48,14 +49,20 @@ def get_chain(idiom:str):
         return base_chain_en
     
 
-def get_retriever(collection_name:str,query:str):
+def get_retriever(collection_name:str,query:str,filtros:None):
     vectorstore=get_collection_vectorstore(collection_name)
     if vectorstore!= None:
+        search_kwargs=settings.SEARCH_KWARGS
+        if filtros!=None:
+            search_kwargs['filter'] = filtros
         retriever = vectorstore.as_retriever(
         search_type=settings.SEARCH_TYPE,
-        search_kwargs=settings.SEARCH_KWARGS,
+        search_kwargs=search_kwargs,
         )
-        retriever= apply_bm25(query,retriever,collection_name)
+        compression_retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=retriever
+        )
+        retriever= apply_bm25(query,compression_retriever,collection_name,filtros)
         return retriever
     else: return vectorstore
     
@@ -102,13 +109,6 @@ def show(inputs):
     return inputs
 
 
-def get_session_history(session_id: str) -> BaseChatMessageHistory:
-    if session_id not in store:
-        store[session_id] = ChatMessageHistory()
-    store[session_id].messages = store[session_id].messages[-4:]
-    return store[session_id]
-
-
 def get_message_history(session_id: str) -> RedisChatMessageHistory:
     return RedisChatMessageHistory(session_id, url=settings.REDIS_URL)
 
@@ -121,16 +121,16 @@ def create_chain_history(query:str,chain,session_id:str):
         history_messages_key="chat_history",
         output_messages_key="answer",
     ) 
-    print("final")
-    
-    return conversational_rag_chain.invoke({"input": query},config={"configurable": {"session_id": session_id}},  # constructs a key "abc123" in `store`.
+    return conversational_rag_chain.invoke({"input": query},config={"configurable": {"session_id": session_id}}, 
     )["answer"]
     
 
+
 def get_history_chat(session_id:str):
     from langchain_core.messages import AIMessage
-    history = []  
-    for message in store[session_id].messages:
+    history=[]  
+    redis_history = get_message_history(session_id) 
+    for message in redis_history.messages:
         if isinstance(message, AIMessage):
             prefix = "AI"
         else:

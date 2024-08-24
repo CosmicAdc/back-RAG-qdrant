@@ -4,6 +4,8 @@ from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_core.runnables import ConfigurableField
 from langchain_community.llms import VLLMOpenAI
 from app.constants import constants as settings
+from langchain.retrievers.document_compressors import LLMChainExtractor
+from langchain.retrievers.document_compressors import FlashrankRerank
 
     
 http_client = httpx.Client(verify=False)
@@ -29,6 +31,7 @@ VLLM = VLLMOpenAI(
     ),
 )
 
+compressor = FlashrankRerank(top_n=3,model="ms-marco-MultiBERT-L-12")
 
 model_name = "jinaai/jina-embeddings-v2-base-es"
 model_kwargs = {'device': 'cpu'}
