@@ -56,3 +56,48 @@ async def process_urls(data: UploadUrlSchema):
     
     
     
+
+async def process_uploaded_file( loader, metadata , check,collection_name):
+    documents = loader.load()
+    print(documents)
+    docs = []
+    metadata_values = {}
+
+    if metadata is not None:
+        for cadena_json in metadata:
+            objeto_json = json.loads(cadena_json)
+            metadata_values.update(objeto_json)  
+    print(metadata_values)
+    
+    for document in documents:
+        if not document.page_content.strip():
+            continue  
+        metadata_values = {}
+        if metadata is not None:
+            if isinstance(metadata, list):
+                for json_string in metadata:
+                    try:
+                        json_object = json.loads(json_string)
+                        print(f"JSON object: {json_object}")  # Print JSON object
+                        metadata_values.update(json_object)
+                    except json.JSONDecodeError as e:
+                        print(f"Error decoding JSON: {e}")  # Print error if JSON decoding fails
+            else:
+                metadata_values.update(metadata)
+        metadata_dict = document.metadata
+        if metadata_dict is not None and isinstance(metadata_dict, dict):
+            metadata_values.update(metadata_dict)
+        id_unico = uuid.uuid4()
+        metadata_values['id_file'] = str(id_unico)
+        dc = str(document.page_content)
+        if check == 1:
+            newTxt = translate(str(dc))
+            dc = newTxt
+        dc = cleanTXT(dc)
+        newdoc =Document(page_content=dc, metadata=metadata_values)
+        docs.append(newdoc)
+    docs_split=text_splitter.split_documents(docs)
+    if len(docs) == 0:
+        return None
+    return await add_documents(list_documents=docs_split, collection_name=collection_name)
+    

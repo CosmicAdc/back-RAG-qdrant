@@ -79,7 +79,6 @@ def format_data_documents(records):
             'metadata': record.payload['metadata'],
             'page_content': record.payload['page_content']
         }
-    
     return extracted_data
 
 def get_all_documents_by_collection(collection_name:str):
