@@ -70,6 +70,10 @@ def delete_documents(list_ids:List[str],collection_name:str):
        vectorstore.delete(ids=list_ids)
        return True
     else: return vectorstore
+
+def get_all_collections():
+    collections = client.get_collections()
+    return collections
     
 def format_data_documents(records):
     records_list, _ = records

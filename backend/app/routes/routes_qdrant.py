@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 import json
 
 from app.bdd.qdrant_manage import (
+    get_all_collections,
     validate_existence_collection,
     create_collection,
     add_documents,
@@ -117,3 +118,16 @@ async def update_documents_endpoint(data: UpdateDocumentSchema = Body(...)):
         return JSONResponse(content={"message": str(e)}, status_code=e.status_code)
     except Exception as e:
         return JSONResponse(content={"message": "Error inesperado " + str(e)}, status_code=500)
+
+
+@router.get("/get_all_collections")
+async def get_all_collections_endpoint():
+    try:
+        return get_all_collections()
+        return JSONResponse(content=result_dict, status_code=200)
+    except HTTPException as e:
+        return JSONResponse(content={"message": str(e)}, status_code=e.status_code)
+    except Exception as e:
+        return JSONResponse(content={"message": "Error inesperado " + str(e)}, status_code=500)
+
+
