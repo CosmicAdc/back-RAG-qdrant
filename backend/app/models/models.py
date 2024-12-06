@@ -15,7 +15,7 @@ VLLM = VLLMOpenAI(
     openai_api_base=f"{settings.VLLM_REMOTE_HOST}/v1",
     model_name=settings.VLLM_MODEL,
     max_tokens=settings.VLLM_MAX_TOKENS,
-    temperature=0.1,
+    temperature=0.2,
     model_kwargs={"stop": ["<|end|>","Human"]},
     http_client=http_client,
 ).configurable_fields(

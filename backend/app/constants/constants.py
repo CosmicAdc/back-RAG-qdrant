@@ -11,7 +11,7 @@ SEARCH_TYPE:str = os.getenv("SEARCH_TYPE", "mmr")
 
 SEARCH_KWARGS: dict = {
     "k": int(os.getenv("k", "2")),
-    "fetch_k": int(os.getenv("fetch_k", "5")),
+    "fetch_k": int(os.getenv("fetch_k", "3")),
     "lambda_mult": float(os.getenv("lambda_mult", "0.5"))
 }
 

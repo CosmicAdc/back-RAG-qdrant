@@ -64,10 +64,16 @@ async def process_uploaded_file( loader, metadata , check,collection_name):
     metadata_values = {}
 
     if metadata is not None:
-        for cadena_json in metadata:
-            objeto_json = json.loads(cadena_json)
-            metadata_values.update(objeto_json)  
-    print(metadata_values)
+        # Si ya es un dict, no intentes cargarlo como JSON nuevamente
+        if isinstance(metadata, str):
+            metadata_object = json.loads(metadata)
+        elif isinstance(metadata, dict):
+            metadata_object = metadata
+        else:
+            raise TypeError("Metadata debe ser un str o un dict.")
+
+        # Combinar los valores de metadata en el diccionario
+        metadata_values.update(metadata_object)
     
     for document in documents:
         if not document.page_content.strip():

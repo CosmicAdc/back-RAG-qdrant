@@ -38,7 +38,7 @@ def allowed_file(filename):
 @router.post("/uploadfiles")
 async def create_upload_files(
     files: List[UploadFile] = File(...),
-     metadata: Optional[str] = Form(None),
+    metadata: str = Form(None),
     traducir: int = Form(...),
     collection_name: str = Form(...)
 ):
