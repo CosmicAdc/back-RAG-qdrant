@@ -40,7 +40,8 @@ async def create_upload_files(
     files: List[UploadFile] = File(...),
     metadata: str = Form(None),
     traducir: int = Form(...),
-    collection_name: str = Form(...)
+    collection_name: str = Form(...),
+    practice: int = Form(...)
 ):
     check = int(traducir)
 
@@ -71,6 +72,6 @@ async def create_upload_files(
             raise HTTPException(status_code=400, detail="Tipo de archivo no compatible")
 
         # Procesar el archivo cargado
-        await process_uploaded_file(loader, metadata_dict, check, collection_name)
+        await process_uploaded_file(loader, metadata_dict, check, collection_name,practice)
 
     return {"files_processed": len(files)}
