@@ -88,31 +88,13 @@ async def update_documents_endpoint(data: UpdateDocumentSchema = Body(...)):
     try:
         collection_name = data.collection_name
         list_ids = data.list_ids
-
-        if data.url:
-            result = delete_documents(list_ids, collection_name)
-            if not result:
-                return JSONResponse(content={"message": "Error al eliminar documentos"}, status_code=500)
-            upload_data = UploadUrlSchema(
-                urls=[data.url],
-                metadata=data.new_metadata,
-                collection_name=collection_name,
-                check=0  
-            )
-            result = await process_urls(upload_data)
-            if result is not None:
-                return JSONResponse(content={"message": "URL procesada correctamente"}, status_code=200)
-            else:
-                return JSONResponse(content={"message": "Error al procesar la URL"}, status_code=500)
-
+        # Update with new_page_content
+        document = Document(page_content=data.new_page_content, metadata=data.new_metadata)
+        result = await update_documents(collection_name, list_ids, document)
+        if result:
+            return JSONResponse(content={"message": "Documentos actualizados correctamente"}, status_code=200)
         else:
-            # Update with new_page_content
-            document = Document(page_content=data.new_page_content, metadata=data.new_metadata)
-            result = await update_documents(collection_name, list_ids, document)
-            if result:
-                return JSONResponse(content={"message": "Documentos actualizados correctamente"}, status_code=200)
-            else:
-                return JSONResponse(content={"message": "Error al actualizar documentos"}, status_code=500)
+            return JSONResponse(content={"message": "Error al actualizar documentos"}, status_code=500)
 
     except HTTPException as e:
         return JSONResponse(content={"message": str(e)}, status_code=e.status_code)
