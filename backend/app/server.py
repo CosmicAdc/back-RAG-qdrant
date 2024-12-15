@@ -13,7 +13,6 @@ from app.routes import routes_history,routes_upload,routes_qdrant
 app = FastAPI()
 
 
-app.include_router(routes_history.router) 
 app.include_router(routes_upload.router)
 app.include_router(routes_qdrant.router)
 

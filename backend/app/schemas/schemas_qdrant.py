@@ -13,8 +13,7 @@ class DeleteDocumentSchema(BaseModel):
 class UpdateDocumentSchema(BaseModel):
     collection_name: str = Field(..., description="Name of the collection to update documents in")
     list_ids: List[str] = Field(..., description="List of document IDs to update")
-    new_page_content: Optional[str] = Field(None, description="New page content for the document")
-    url: Optional[str] = Field(None, description="URL to fetch content from")
+    new_page_content: str = Field(None, description="New page content for the document")
     new_metadata: Optional[Dict[str, str]] = Field(None, description="New metadata for the document")
 
 
