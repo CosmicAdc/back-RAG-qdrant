@@ -47,7 +47,6 @@ async def validate_collection_endpoint(collection_name: str):
     except Exception as e:
         return JSONResponse(content={"message": "Error inesperado " + str(e)}, status_code=500)
 
-
 @router.delete("/delete_collection/{collection_name}")
 async def delete_collection_endpoint(collection_name: str):
     try:
@@ -88,7 +87,6 @@ async def update_documents_endpoint(data: UpdateDocumentSchema = Body(...)):
     try:
         collection_name = data.collection_name
         list_ids = data.list_ids
-        # Update with new_page_content
         document = Document(page_content=data.new_page_content, metadata=data.new_metadata)
         result = await update_documents(collection_name, list_ids, document)
         if result:
