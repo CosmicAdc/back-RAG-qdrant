@@ -43,3 +43,41 @@ class QuerySchema(BaseModel):
     session_id: str = Field(..., description="session ID")
 
 
+class UserBase(BaseModel):
+    username: str
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class CollectionBase(BaseModel):
+    name: str
+
+class CollectionCreate(CollectionBase):
+    pass
+
+class CollectionResponse(CollectionBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+class TemaBase(BaseModel):
+    name: str
+    collection_id: Optional[int]
+
+class TemaCreate(TemaBase):
+    pass
+
+class TemaResponse(TemaBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
