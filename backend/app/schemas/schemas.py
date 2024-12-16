@@ -81,3 +81,8 @@ class TemaResponse(TemaBase):
         orm_mode = True
 
 
+class CollectionCreate(BaseModel):
+    name: str  # Solo se necesita el nombre de la colección para crearla
+
+    class Config:
+        orm_mode = True

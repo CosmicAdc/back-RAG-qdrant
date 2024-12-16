@@ -1,9 +1,9 @@
 from app.bdd.information_manage import process_urls
 from app.schemas.schemas import UploadUrlSchema
-from fastapi import HTTPException, Body, APIRouter
+from fastapi import Depends, HTTPException, Body, APIRouter
 from fastapi.responses import JSONResponse
 import json
-
+from app.bdd.postgres import get_db
 from app.bdd.qdrant_manage import (
     get_all_collections,
     validate_existence_collection,
@@ -20,17 +20,17 @@ from app.schemas.schemas_qdrant import (
     UpdateDocumentSchema,
 )
 from langchain_core.documents import Document
-
+from sqlalchemy.orm import Session
 router = APIRouter(
     prefix="/qdrant",
     tags=["Qdrant"],
 )
 
 @router.post("/create_collection")
-async def create_collection_endpoint(data: CollectionSchema = Body(...)):
+async def create_collection_endpoint(data: CollectionSchema = Body(...), db: Session = Depends(get_db)):
     try:
         collection_name = data.collection_name
-        result = create_collection(collection_name)
+        result = create_collection(db,collection_name)
         return JSONResponse(content={"message": result}, status_code=200)
     except HTTPException as e:
         return JSONResponse(content={"message": str(e)}, status_code=e.status_code)
@@ -49,9 +49,9 @@ async def validate_collection_endpoint(collection_name: str):
 
 
 @router.delete("/delete_collection/{collection_name}")
-async def delete_collection_endpoint(collection_name: str):
+async def delete_collection_endpoint(collection_name: str, db: Session = Depends(get_db)):
     try:
-        result = delete_collection(collection_name)
+        result = delete_collection(db,collection_name)
         return JSONResponse(content={"message": result}, status_code=200)
     except HTTPException as e:
         return JSONResponse(content={"message": str(e)}, status_code=e.status_code)

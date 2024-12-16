@@ -9,14 +9,20 @@ class User(Base):
     password = Column(String, nullable=False)
 
 class Collection(Base):
-    __tablename__ = "collections"
+    __tablename__ = 'collections'
+
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
+    name = Column(String, index=True)
+
+    temas = relationship("Tema", back_populates="collection", cascade="all, delete-orphan")
 
 class Tema(Base):
-    __tablename__ = "tema"
+    __tablename__ = 'temas'
+
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    collection_id = Column(Integer, ForeignKey("collections.id"))
+    name = Column(String, index=True)
+    collection_id = Column(Integer, ForeignKey('collections.id'))
+
+    collection = relationship("Collection", back_populates="temas")
     
 Base.metadata.create_all(bind=engine)

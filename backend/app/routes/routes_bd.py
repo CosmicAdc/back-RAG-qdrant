@@ -22,3 +22,25 @@ def verify_password(username: str, password: str, db: Session = Depends(get_db))
     if not user or not crud.verify_password(password, user.password):
         raise HTTPException(status_code=400, detail="Invalid username or password")
     return {"message": "Password is valid"}
+
+@router.delete("/delete-tema/{tema_name}")
+async def delete_tema(tema_name: str, db: Session = Depends(get_db)):
+    success = crud.delete_tema_by_name(db, tema_name)
+    if success:
+        return {"message": f"El tema '{tema_name}' ha sido eliminado correctamente."}
+    else:
+        raise HTTPException(status_code=404, detail="Tema no encontrado.")
+    
+@router.post("/create-tema/")
+async def create_tema_endpoint(tema: schemas.TemaCreate, db: Session = Depends(get_db)):
+    db_tema = crud.create_tema(db=db, tema=tema)
+    return {"message": "Tema creado con éxito", "tema": db_tema}
+
+@router.delete("/collection/{collection_name}")
+def delete_collection(collection_name: str, db: Session = Depends(get_db)):
+    success = crud.delete_collection_by_name(db, collection_name)
+    if success:
+        return {"message": "Collection and its temas deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    

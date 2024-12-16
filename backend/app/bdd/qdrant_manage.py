@@ -6,7 +6,7 @@ from langchain_core.documents import Document
 from uuid import uuid4
 from typing import List
 import json
-
+from app.schemas import schemas
 from langchain.chains.query_constructor.ir import (
     Comparator,
     Comparison,
@@ -14,7 +14,9 @@ from langchain.chains.query_constructor.ir import (
     Operator,
 )
 from langchain.retrievers.self_query.qdrant import QdrantTranslator
- 
+from app.bdd import crud
+from sqlalchemy.orm import Session
+
 client = QdrantClient(
     host="localhost", port=6333
 )
@@ -24,14 +26,16 @@ def validate_existence_collection(collection_name:str):
     return client.collection_exists(collection_name=collection_name)
 
 
-def create_collection(collection_name:str):
+def create_collection(db:Session,collection_name:str):
     try:
         if not validate_existence_collection(collection_name):
             client.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=768, distance=Distance.COSINE),
             )
-            return "Colleción creada"
+            collection_data = schemas.CollectionCreate(name=collection_name)  # Crear el objeto CollectionCreate
+            if crud.create_collection(db,collection_data):
+                return "Colleción creada"
         else:
             return "Colleción ya existe"
     except Exception as e:
@@ -57,10 +61,11 @@ async def add_documents(list_documents:List[Document],collection_name:str):
         return "url procesadas correctamente"
     else: return vectorstore
 
-def delete_collection(collection_name:str):
+def delete_collection(db:Session,collection_name:str):
     vectorstore=get_collection_vectorstore(collection_name)
     if vectorstore!= None:
         client.delete_collection(collection_name=collection_name)
+        crud.delete_collection_by_name(db,collection_name)
         return True
     else: return False
 
