@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.include_router(routes_upload.router)
 app.include_router(routes_qdrant.router)
-
+app.include_router(routes_history.router)
 
 
 app.add_middleware(
