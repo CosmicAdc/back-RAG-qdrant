@@ -18,7 +18,7 @@ from app.bdd import crud
 from sqlalchemy.orm import Session
 
 client = QdrantClient(
-    host="localhost", port=6333
+    host="qdrant", port=6333
 )
 
 
