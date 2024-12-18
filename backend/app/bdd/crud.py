@@ -15,6 +15,9 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
+def get_all_collections(db: Session):
+    return db.query(models.Collection).all()
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))

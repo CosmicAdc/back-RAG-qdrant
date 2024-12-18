@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.bdd import crud
 from app.schemas import schemas
-from app.models import models
+from app.bdd import models
 from app.bdd.postgres import get_db
 
 router = APIRouter(
@@ -44,3 +44,6 @@ def delete_collection(collection_name: str, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=404, detail="Collection not found")
     
+@router.get("/collections/")
+def read_all_collections(db: Session = Depends(get_db)):
+    return crud.get_all_collections(db)
