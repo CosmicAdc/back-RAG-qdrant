@@ -16,7 +16,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already registered")
     return crud.create_user(db, user)
 
-@router.post("/users/verify-password/")
+@router.post("/users/verify-password")
 def verify_password(username: str, password: str, db: Session = Depends(get_db)):
     user = crud.get_user_by_username(db, username=username)
     if not user or not crud.verify_password(password, user.password):

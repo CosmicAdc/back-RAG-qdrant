@@ -7,9 +7,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    class Config:
-        from_attributes=True
-        orm_mode=True
 
 class Collection(Base):
     __tablename__ = 'collections'
@@ -18,9 +15,6 @@ class Collection(Base):
     name = Column(String, index=True)
 
     temas = relationship("Tema", back_populates="collection", cascade="all, delete-orphan")
-    class Config:
-        from_attributes=True
-        orm_mode=True
 
 class Tema(Base):
     __tablename__ = 'temas'
@@ -30,8 +24,6 @@ class Tema(Base):
     collection_id = Column(Integer, ForeignKey('collections.id'))
 
     collection = relationship("Collection", back_populates="temas")
-    class Config:
-        from_attributes=True
-        orm_mode=True
+
     
 Base.metadata.create_all(bind=engine)
