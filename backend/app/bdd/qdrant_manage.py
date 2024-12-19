@@ -1,5 +1,5 @@
 from qdrant_client import QdrantClient
-from langchain_qdrant import Qdrant
+from langchain_qdrant import Qdrant, QdrantVectorStore
 from qdrant_client.http.models import Distance, VectorParams
 from app.models.models import embeddings
 from langchain_core.documents import Document
@@ -51,15 +51,31 @@ def get_collection_vectorstore(collection_name:str):
     else:
         print("no se encontro la collección")
         return None
+    
+def get_collection_vectorstore_for_add(collection_name:str):
+    if validate_existence_collection(collection_name):
+        return QdrantVectorStore.from_existing_collection(
+            embedding=embeddings,
+            collection_name=collection_name,
+            url="http://localhost:6333",
+            content_payload_key="content"
+        )
+    else:
+        print("no se encontro la collección")
+        return None
 
 async def add_documents(list_documents:List[Document],collection_name:str):
     print(list_documents)
-    vectorstore=get_collection_vectorstore(collection_name)
+    vectorstore=get_collection_vectorstore_for_add(collection_name)
+    print(vectorstore)
     if vectorstore!= None:
         ids = [str(uuid4()) for _ in range(len(list_documents))]
         vectorstore.add_documents(documents=list_documents, ids=ids)
         return "url procesadas correctamente"
     else: return vectorstore
+
+
+    
 
 def delete_collection(db:Session,collection_name:str):
     vectorstore=get_collection_vectorstore(collection_name)
@@ -86,12 +102,12 @@ def format_data_documents(records):
     for record in records_list:
         extracted_data[record.id] = {
             'metadata': record.payload['metadata'],
-            'page_content': record.payload['page_content']
+            'page_content': record.payload['content']
         }
     return extracted_data
 
 def get_all_documents_by_collection(collection_name:str):
-    vectorstore=get_collection_vectorstore(collection_name)
+    vectorstore=get_collection_vectorstore_for_add(collection_name)
     if vectorstore!= None:
         result= client.scroll(
             collection_name=collection_name,

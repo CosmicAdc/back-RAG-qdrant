@@ -62,7 +62,6 @@ async def process_uploaded_file(loader, metadata, check, collection_name, practi
     metadata_values = {}
 
     if metadata is not None:
-        # Si ya es un dict, no intentes cargarlo como JSON nuevamente
         if isinstance(metadata, str):
             metadata_object = json.loads(metadata)
         elif isinstance(metadata, dict):
@@ -70,7 +69,6 @@ async def process_uploaded_file(loader, metadata, check, collection_name, practi
         else:
             raise TypeError("Metadata debe ser un str o un dict.")
 
-        # Combinar los valores de metadata en el diccionario
         metadata_values.update(metadata_object)
     
     combined_content = ""  # Variable para almacenar contenido combinado si practice == 1
@@ -120,11 +118,7 @@ async def process_uploaded_file(loader, metadata, check, collection_name, practi
     # Si practice == 1, crear un solo documento
     if practice == 1:
         combined_doc = Document(page_content=combined_content.strip(), metadata=metadata_values)
-        docs_split = [combined_doc]
-
-
-    # Dividir los documentos
-    
+        docs_split = [combined_doc]    
 
     if len(docs_split) == 0:
         return None

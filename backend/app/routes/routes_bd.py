@@ -47,3 +47,10 @@ def delete_collection(collection_name: str, db: Session = Depends(get_db)):
 @router.get("/collections/")
 def read_all_collections(db: Session = Depends(get_db)):
     return crud.get_all_collections(db)
+
+@router.get("/collections/{collection_id}/temas/")
+def get_temas_by_collection(collection_id: int, db: Session = Depends(get_db)):
+    temas = crud.get_temas_by_collection_id(db, collection_id)
+    if not temas:
+        return []
+    return temas

@@ -55,3 +55,5 @@ def delete_collection_by_name(db: Session, collection_name: str):
         return True
     return False
 
+def get_temas_by_collection_id(db: Session, collection_id: int):
+    return db.query(models.Tema).filter(models.Tema.collection_id == collection_id).all()
